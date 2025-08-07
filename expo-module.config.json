@@ -1,0 +1,9 @@
+{
+  "platforms": ["apple", "android", "web"],
+  "apple": {
+    "modules": ["NativeLiblouisModule"]
+  },
+  "android": {
+    "modules": ["com.henhen1227.nativeliblouis.NativeLiblouisModule"]
+  }
+}
