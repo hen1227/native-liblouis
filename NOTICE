@@ -1,0 +1,16 @@
+native-liblouis includes and links to Liblouis, a braille translation library.
+
+Liblouis is licensed under the GNU Lesser General Public License (LGPL) v2.1 or later.
+Source: https://liblouis.io/
+Repository: https://github.com/liblouis/liblouis
+
+This product bundles Liblouis data tables and compiled binaries in accordance
+with the LGPL-2.1-or-later license terms. You may obtain a copy of the
+corresponding source code at:
+https://github.com/liblouis/liblouis
+
+Upstream copyright:
+Copyright (c) 2004-2025, the Liblouis contributors
+
+Full text of the LGPL-2.1 license is included in this distribution as
+LGPL-2.1.txt.

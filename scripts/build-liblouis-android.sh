@@ -189,7 +189,7 @@ for arch in "${ARCHITECTURES[@]}"; do
 done
 
 # ---------- copy headers (after all builds are complete) ----------
-echo "📋 Copying liblouis headers..."
+echo "Copying liblouis headers..."
 # Use the first architecture's build to copy headers (they're the same for all)
 FIRST_ARCH_BUILD_DIR="$BUILD_DIR/android-${ARCHITECTURES[0]}"
 if [ -d "$FIRST_ARCH_BUILD_DIR/include" ]; then
@@ -203,7 +203,7 @@ else
 fi
 
 # ---------- copy braille tables ----------
-echo "📋 Copying braille tables..."
+echo "Copying braille tables..."
 TABLES_SRC="$ROOT/bundled_tables"
 TABLES_DEST="$OUT_DIR/assets/tables"
 

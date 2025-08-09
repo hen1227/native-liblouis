@@ -1,6 +1,6 @@
 {
   "name": "native-liblouis",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Native Module for running a native version of the Liblouis braille translator",
   "main": "build/index.js",
   "types": "build/index.d.ts",
@@ -12,11 +12,11 @@
     "tables:clear": "node ./scripts/tables.mjs clear",
     "tables:sync": "node ./scripts/tables.mjs sync",
 
-    "build": "expo-module build",
+    "build": "tsc && copyfiles -u 1 \"src/liblouis-web/*.*\" build",
     "clean": "expo-module clean",
     "lint": "expo-module lint",
     "test": "expo-module test",
-    "prepare": "expo-module prepare",
+    "prepare": "expo-module prepare && copyfiles -u 1 \"src/liblouis-web/*.*\" build",
     "prepublishOnly": "expo-module prepublishOnly",
     "expo-module": "expo-module",
     "open:ios": "xed example/ios",
@@ -28,26 +28,21 @@
     "native-liblouis",
     "NativeLiblouisModule"
   ],
-  "repository": "https://github.com/hen1227/native-liblouis",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hen1227/native-liblouis.git"
+  },
   "bugs": {
     "url": "https://github.com/hen1227/native-liblouis/issues"
   },
-  "files": [
-    "build",
-    "android",
-    "ios",
-    "expo-module.config.json",
-    "README.md",
-    "LICENSE"
-  ],
   "author": "Henry Abrahamsen <henhen1227@gmail.com> (https://github.com/hen1227)",
-  "license": "LGPL-2.1-or-later",
+  "license": "MIT",
   "homepage": "https://github.com/hen1227/native-liblouis#readme",
-  "dependencies": {},
   "devDependencies": {
     "@types/react": "~19.0.0",
-    "expo-module-scripts": "^4.1.9",
+    "copyfiles": "^2.4.1",
     "expo": "~53.0.0",
+    "expo-module-scripts": "^4.1.9",
     "react-native": "0.79.1"
   },
   "peerDependencies": {

@@ -6,7 +6,7 @@ Pod::Spec.new do |s|
   s.summary      = 'Expo Swift wrapper around liblouis.'
   s.description  = 'On‑device UEB Grade 1 & 2 Braille translation and back‑translation.'
   s.homepage     = 'https://github.com/hen1227/native-liblouis'
-  s.license          = { :type => 'LGPL-2.1-or-later', :file => 'LICENSE' }
+  s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author       = { 'Henry Abrahamsen' => 'henhen1227@gmail.com' }
 #   s.source       = { :path => './ios' }
   s.source       = { :path => '.' }

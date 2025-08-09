@@ -12,6 +12,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "experiments": {
+      "baseUrl": "/native-liblouis"
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.henhen1227.nativeliblouis.example"

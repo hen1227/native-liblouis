@@ -60,7 +60,7 @@ xcodebuild -create-xcframework \
 cp "$ROOT/LICENSE" "$OUT_DIR/LICENSE"
 
 # ---------- copy braille tables (iOS assets) ----------
-echo "📋 Copying braille tables to iOS assets..."
+echo "Copying braille tables to iOS assets..."
 rm -rf "$IOS_TABLES_ASSETS_DIR"
 mkdir -p "$IOS_TABLES_ASSETS_DIR"
 
@@ -73,7 +73,7 @@ else
     cp "$LIBLOUIS_TABLES"/*.{tbl,utb,ctb,cti,cto,dis} "$IOS_TABLES_ASSETS_DIR/" 2>/dev/null || true
     echo "Copied from liblouis source tables → $IOS_TABLES_ASSETS_DIR"
   else
-    echo "⚠️  No tables found at $BUNDLED_TABLES_DIR or $LIBLOUIS_TABLES"
+    echo "No tables found at $BUNDLED_TABLES_DIR or $LIBLOUIS_TABLES"
   fi
 fi
 
