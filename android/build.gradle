@@ -1,43 +1,131 @@
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
 
-group = 'com.henhen1227.nativeliblouis'
-version = '0.1.0'
+group = 'expo.modules.nativeliblouis'
+version = '0.2.0'
+ext.kotlin_version = '2.0.21'
 
 def expoModulesCorePlugin = new File(project(":expo-modules-core").projectDir.absolutePath, "ExpoModulesCorePlugin.gradle")
 apply from: expoModulesCorePlugin
-applyKotlinExpoModulesCorePlugin()
-useCoreDependencies()
-useExpoPublishing()
 
-// If you want to use the managed Android SDK versions from expo-modules-core, set this to true.
-// The Android SDK versions will be bumped from time to time in SDK releases and may introduce breaking changes in your module code.
-// Most of the time, you may like to manage the Android SDK versions yourself.
-def useManagedAndroidSdkVersions = false
-if (useManagedAndroidSdkVersions) {
-  useDefaultAndroidSdkVersions()
-} else {
-  buildscript {
-    // Simple helper that allows the root project to override versions declared by this library.
-    ext.safeExtGet = { prop, fallback ->
-      rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
+kotlin {
+  jvmToolchain(17)
+}
+
+android {
+  namespace "expo.modules.nativeliblouis"
+  compileSdkVersion safeExtGet("compileSdkVersion", 35)
+
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_17
+    targetCompatibility JavaVersion.VERSION_17
+  }
+
+  kotlinOptions {
+    jvmTarget = "17"
+  }
+
+  defaultConfig {
+    minSdkVersion safeExtGet("minSdkVersion", 24)
+    targetSdkVersion safeExtGet("targetSdkVersion", 35)
+    versionCode 1
+    versionName "1.0.0"
+
+    ndk {
+      abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86', 'x86_64'
+    }
+
+    externalNativeBuild {
+      cmake {
+        cppFlags "-O2 -frtti -fexceptions"
+        abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86', 'x86_64'
+      }
     }
   }
-  project.android {
-    compileSdkVersion safeExtGet("compileSdkVersion", 34)
-    defaultConfig {
-      minSdkVersion safeExtGet("minSdkVersion", 21)
-      targetSdkVersion safeExtGet("targetSdkVersion", 34)
+
+  externalNativeBuild {
+    cmake {
+      path file('CMakeLists.txt')
+    }
+  }
+
+  // Prevent duplicate libraries by excluding the jniLibs directory from packaging
+  packagingOptions {
+    // Exclude the static libraries (.a files) from being packaged
+    exclude '**/liblouis.a'
+
+    // Pick first occurrence if there are duplicates
+    pickFirst '**/libliblouis-jni.so'
+  }
+
+  // Don't package libraries from src/main/jniLibs since CMake handles the .so creation
+  sourceSets {
+    main {
+      // Remove jniLibs from source sets to prevent automatic packaging
+      jniLibs.srcDirs = []
+    }
+  }
+
+  lintOptions {
+    abortOnError false
+  }
+
+  publishing {
+    singleVariant 'release'
+  }
+
+  // Ensure native build happens after our libraries are in place
+  tasks.whenTaskAdded { task ->
+    if (task.name.contains('externalNativeBuild')) {
+      task.dependsOn checkLibLouisLibraries
     }
   }
 }
 
-android {
-  namespace "com.henhen1227.nativeliblouis"
-  defaultConfig {
-    versionCode 1
-    versionName "0.1.0"
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  implementation project(':expo-modules-core')
+  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+}
+
+// Task to check if liblouis static libraries exist before building
+tasks.register('checkLibLouisLibraries') {
+  doLast {
+    def architectures = ['arm64-v8a', 'armeabi-v7a', 'x86', 'x86_64']
+    def missingLibs = []
+    def includeDir = file("src/main/cpp/include")
+
+    // Check for static libraries
+    architectures.each { arch ->
+      def libPath = file("src/main/jniLibs/${arch}/liblouis.a")
+      if (!libPath.exists()) {
+        missingLibs.add("${arch}/liblouis.a")
+      }
+    }
+
+    // Check for headers
+    if (!includeDir.exists() || !file("${includeDir}/liblouis/liblouis.h").exists()) {
+      missingLibs.add("headers (liblouis/liblouis.h)")
+    }
+
+    if (!missingLibs.empty) {
+      throw new GradleException(
+        "Missing liblouis components: ${missingLibs.join(', ')}\n" +
+        "Please run the build-liblouis-android.sh script first to build liblouis for Android.\n" +
+        "Expected structure:\n" +
+        "  - src/main/jniLibs/{arch}/liblouis.a\n" +
+        "  - src/main/cpp/include/liblouis/liblouis.h"
+      )
+    }
+
+    println "✅ All required liblouis static libraries and headers found"
   }
-  lintOptions {
-    abortOnError false
-  }
+}
+
+// Helper function
+def safeExtGet(prop, fallback) {
+  rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
 }

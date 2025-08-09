@@ -1,29 +1,43 @@
-require 'json'
-
-package = JSON.parse(File.read(File.join(__dir__, '..', 'package.json')))
-
 Pod::Spec.new do |s|
-  s.name           = 'NativeLiblouisModule'
-  s.version        = package['version']
-  s.summary        = package['description']
-  s.description    = package['description']
-  s.license        = package['license']
-  s.author         = package['author']
-  s.homepage       = package['homepage']
-  s.platforms      = {
-    :ios => '15.1',
-    :tvos => '15.1'
-  }
-  s.swift_version  = '5.4'
-  s.source         = { git: 'https://github.com/hen1227/native-liblouis' }
-  s.static_framework = true
+  s.name         = 'NativeLiblouisModule'
+  s.module_name  = 'NativeLiblouisModule'
 
+  s.version      = '0.3.8'
+  s.summary      = 'Expo Swift wrapper around liblouis.'
+  s.description  = 'On‑device UEB Grade 1 & 2 Braille translation and back‑translation.'
+  s.homepage     = 'https://github.com/hen1227/native-liblouis'
+  s.license          = { :type => 'LGPL-2.1-or-later', :file => 'LICENSE' }
+  s.author       = { 'Henry Abrahamsen' => 'henhen1227@gmail.com' }
+#   s.source       = { :path => './ios' }
+  s.source       = { :path => '.' }
+
+  # ---- platform & build ----------------------------------------------------
+  s.platform        = :ios, '13.0'
+  s.swift_version   = '5.9'
+  s.static_framework = true                # Expo autolinking prefers static
+
+  # ---- source --------------------------------------------------------------
+#   s.source_files = 'ios/**/*.{swift,h,m}'
+  s.source_files = '**/*.{swift,h,m}'
+
+  # pre‑built binary you dropped in ios/liblouis.framework
+#   s.vendored_frameworks = 'ios/liblouis.xcframework'
+  s.vendored_frameworks = 'liblouis.xcframework'
+
+  # ExpoModulesCore for Module / Function DSL
   s.dependency 'ExpoModulesCore'
 
-  # Swift/Objective-C compatibility
-  s.pod_target_xcconfig = {
-    'DEFINES_MODULE' => 'YES',
+  # bundle the .ctb tables so lou_* can find them
+  s.resource_bundles = {
+#     'NativeLiblouisModule' => ['ios/liblouis_assets/**']
+    'NativeLiblouisModule' => ['liblouis_assets/**']
   }
 
-  s.source_files = "**/*.{h,m,mm,swift,hpp,cpp}"
+  # make the Swift module visible & link liblouis
+  s.pod_target_xcconfig = {
+    'DEFINES_MODULE'         => 'YES',
+    'SWIFT_INCLUDE_PATHS'    => '$(PODS_TARGET_SRCROOT)/ios',
+    'FRAMEWORK_SEARCH_PATHS' => '$(PODS_TARGET_SRCROOT)/ios',
+#     'OTHER_LDFLAGS'          => '-framework "liblouis"'
+  }
 end

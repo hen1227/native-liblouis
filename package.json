@@ -5,6 +5,13 @@
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "scripts": {
+    "build-liblouis": "bash ./scripts/build-liblouis.sh",
+    "tables:add": "node ./scripts/tables.mjs add",
+    "tables:remove": "node ./scripts/tables.mjs remove",
+    "tables:list": "node ./scripts/tables.mjs list",
+    "tables:clear": "node ./scripts/tables.mjs clear",
+    "tables:sync": "node ./scripts/tables.mjs sync",
+
     "build": "expo-module build",
     "clean": "expo-module clean",
     "lint": "expo-module lint",
@@ -25,8 +32,16 @@
   "bugs": {
     "url": "https://github.com/hen1227/native-liblouis/issues"
   },
+  "files": [
+    "build",
+    "android",
+    "ios",
+    "expo-module.config.json",
+    "README.md",
+    "LICENSE"
+  ],
   "author": "Henry Abrahamsen <henhen1227@gmail.com> (https://github.com/hen1227)",
-  "license": "MIT",
+  "license": "LGPL-2.1-or-later",
   "homepage": "https://github.com/hen1227/native-liblouis#readme",
   "dependencies": {},
   "devDependencies": {
@@ -37,7 +52,12 @@
   },
   "peerDependencies": {
     "expo": "*",
-    "react": "*",
-    "react-native": "*"
+    "react": ">=18 || >=19",
+    "react-native": ">=0.73 || >=0.79"
+  },
+  "peerDependenciesMeta": {
+    "expo": {
+      "optional": true
+    }
   }
 }

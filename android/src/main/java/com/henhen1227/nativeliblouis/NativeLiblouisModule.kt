@@ -1,50 +1,183 @@
 package com.henhen1227.nativeliblouis
 
+import android.content.Context
+import android.util.Log
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
-import java.net.URL
+import expo.modules.kotlin.Promise
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
 
 class NativeLiblouisModule : Module() {
-  // Each module class must implement the definition function. The definition consists of components
-  // that describes the module's functionality and behavior.
-  // See https://docs.expo.dev/modules/module-api for more details about available components.
-  override fun definition() = ModuleDefinition {
-    // Sets the name of the module that JavaScript code will use to refer to the module. Takes a string as an argument.
-    // Can be inferred from module's class name, but it's recommended to set it explicitly for clarity.
-    // The module will be accessible from `requireNativeModule('NativeLiblouisModule')` in JavaScript.
-    Name("NativeLiblouisModule")
+    companion object {
+        private const val TAG = "NativeLiblouisModule"
+        private var isInitialized = false
+        private var tablesPath: String = ""
 
-    // Sets constant properties on the module. Can take a dictionary or a closure that returns a dictionary.
-    Constants(
-      "PI" to Math.PI
-    )
+        init {
+            try {
+                System.loadLibrary("liblouis-jni")
+                Log.i(TAG, "Successfully loaded liblouis-jni library")
+            } catch (e: UnsatisfiedLinkError) {
+                Log.e(TAG, "Failed to load liblouis-jni library", e)
+                throw e
+            }
+        }
 
-    // Defines event names that the module can send to JavaScript.
-    Events("onChange")
+        @JvmStatic
+        private external fun nativeSetDataPath(path: String): Boolean
 
-    // Defines a JavaScript synchronous function that runs the native code on the JavaScript thread.
-    Function("hello") {
-      "Hello world! 👋"
+        @JvmStatic
+        private external fun nativeTranslate(text: String, table: String): String?
+
+        @JvmStatic
+        private external fun nativeBackTranslate(dots: String, table: String): String?
+
+        @JvmStatic
+        private external fun nativeGetLastError(): String?
     }
 
-    // Defines a JavaScript function that always returns a Promise and whose native code
-    // is by default dispatched on the different thread than the JavaScript runtime runs on.
-    AsyncFunction("setValueAsync") { value: String ->
-      // Send an event to JavaScript.
-      sendEvent("onChange", mapOf(
-        "value" to value
-      ))
+    override fun definition() = ModuleDefinition {
+        Name("NativeLiblouisModule")
+
+        Constants(
+            "status" to "NativeLiblouisModule is loaded ✅"
+        )
+
+        Function("lou_translateString") { text: String, table: String ->
+            ensureInitialized()
+
+            val sanitizedInput = text.replace("\u2800", " ") // BRAILLE PATTERN BLANK
+
+            if (sanitizedInput.trim().isEmpty() && text.isNotEmpty()) {
+                return@Function " ".repeat(text.length)
+            }
+
+            val result = nativeTranslate(sanitizedInput, resolveTablePath(table))
+
+            if (result == null) {
+                val error = nativeGetLastError() ?: "Unknown error"
+                throw Exception("liblouis translation failed: $error (input: '$text', table: '$table')")
+            }
+
+            result
+        }
+
+        Function("lou_backTranslateString") { dots: String, table: String ->
+            ensureInitialized()
+
+            val sanitizedInput = dots.replace("\u2800", " ") // BRAILLE PATTERN BLANK
+
+            if (sanitizedInput.trim().isEmpty() && dots.isNotEmpty()) {
+                return@Function " ".repeat(dots.length)
+            }
+
+            val result = nativeBackTranslate(sanitizedInput, resolveTablePath(table))
+
+            if (result == null) {
+                val error = nativeGetLastError() ?: "Unknown error"
+                throw Exception("liblouis back-translation failed: $error (input: '$dots', table: '$table')")
+            }
+
+            result
+        }
+
+        Function("lou_isInitialized") {
+            ensureInitialized()
+            isInitialized
+        }
     }
 
-    // Enables the module to be used as a native view. Definition components that are accepted as part of
-    // the view definition: Prop, Events.
-    View(NativeLiblouisModuleView::class) {
-      // Defines a setter for the `url` prop.
-      Prop("url") { view: NativeLiblouisModuleView, url: URL ->
-        view.webView.loadUrl(url.toString())
-      }
-      // Defines an event that the view can send to JavaScript.
-      Events("onLoad")
+    private fun ensureInitialized() {
+        if (isInitialized) return
+
+        Log.i(TAG, "Initializing NativeLiblouisModule...")
+
+        val context = appContext.reactContext
+          ?: throw IllegalStateException("React context is null")
+
+        val tablesDir = extractBrailleTables(context)
+
+        if (!tablesDir.exists() || !tablesDir.isDirectory) {
+            throw Exception("Failed to extract braille tables to ${tablesDir.absolutePath}")
+        }
+
+        tablesPath = tablesDir.absolutePath
+        val dataPath = tablesDir.parent ?: throw Exception("Invalid tables directory structure")
+
+        Log.i(TAG, "Setting liblouis data path to: $dataPath")
+        Log.i(TAG, "Tables directory: $tablesPath")
+
+        if (!nativeSetDataPath(dataPath)) {
+            throw Exception("Failed to initialize liblouis with data path: $dataPath")
+        }
+
+        isInitialized = true
+        Log.i(TAG, "✅ NativeLiblouisModule initialized successfully")
     }
-  }
+
+    private fun extractBrailleTables(context: Context): File {
+        val appDir = File(context.filesDir, "liblouis")
+        val tablesDir = File(appDir, "tables")
+
+        // Check if tables are already extracted
+        if (tablesDir.exists() && tablesDir.listFiles()?.isNotEmpty() == true) {
+            Log.i(TAG, "Braille tables already extracted to: ${tablesDir.absolutePath}")
+            return tablesDir
+        }
+
+        Log.i(TAG, "Extracting braille tables...")
+
+        try {
+            // Create directories
+            appDir.mkdirs()
+            tablesDir.mkdirs()
+
+            // Extract tables from assets
+            val assetManager = context.assets
+            val tableFiles = assetManager.list("tables") ?: emptyArray()
+
+            if (tableFiles.isEmpty()) {
+                throw IOException("No braille table files found in assets/tables")
+            }
+
+            Log.i(TAG, "Found ${tableFiles.size} table files to extract")
+
+            for (filename in tableFiles) {
+                val inputStream = assetManager.open("tables/$filename")
+                val outputFile = File(tablesDir, filename)
+                val outputStream = FileOutputStream(outputFile)
+
+                inputStream.use { input ->
+                    outputStream.use { output ->
+                        input.copyTo(output)
+                    }
+                }
+
+                Log.d(TAG, "Extracted: $filename")
+            }
+
+            Log.i(TAG, "✅ Successfully extracted ${tableFiles.size} braille table files")
+
+        } catch (e: IOException) {
+            Log.e(TAG, "Failed to extract braille tables", e)
+            throw Exception("Failed to extract braille tables: ${e.message}", e)
+        }
+
+        return tablesDir
+    }
+
+    private fun resolveTablePath(table: String): String {
+        return table.split(",")
+            .map { it.trim() }
+            .map { tableName ->
+                if (tableName.startsWith("/")) {
+                    tableName // Absolute path
+                } else {
+                    File(tablesPath, tableName).absolutePath
+                }
+            }
+            .joinToString(",")
+    }
 }

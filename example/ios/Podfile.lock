@@ -70,7 +70,7 @@ PODS:
   - hermes-engine (0.79.5):
     - hermes-engine/Pre-built (= 0.79.5)
   - hermes-engine/Pre-built (0.79.5)
-  - NativeLiblouisModule (0.1.0):
+  - NativeLiblouisModule (0.3.8):
     - ExpoModulesCore
   - RCT-Folly (2024.11.18.00):
     - boost
@@ -1981,7 +1981,7 @@ SPEC CHECKSUMS:
   fmt: a40bb5bd0294ea969aaaba240a927bd33d878cdd
   glog: 5683914934d5b6e4240e497e0f4a3b42d1854183
   hermes-engine: f03b0e06d3882d71e67e45b073bb827da1a21aae
-  NativeLiblouisModule: 9328a055a0eee2cb7bd92461961aea7b2cc4172a
+  NativeLiblouisModule: 39f9deb3d15284398cd0f3dff7352f1092e7a16a
   RCT-Folly: e78785aa9ba2ed998ea4151e314036f6c49e6d82
   RCTDeprecation: 5f638f65935e273753b1f31a365db6a8d6dc53b5
   RCTRequired: 8b46a520ea9071e2bc47d474aa9ca31b4a935bd8

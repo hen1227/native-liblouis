@@ -1,0 +1,6 @@
+apply from: project(":expo-modules-core").file("gradle/ExpoModulesCorePlugin.gradle")
+useExpoModulesCorePlugin()
+
+android {
+  namespace "expo.modules.nativeliblouis"
+}

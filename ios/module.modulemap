@@ -1,0 +1,5 @@
+// modules/native-liblouis/ios/module.modulemap
+module liblouis {
+  umbrella header "liblouis.h"
+  export *
+}
