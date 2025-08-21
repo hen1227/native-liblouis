@@ -1,24 +1,13 @@
-import { Platform } from 'react-native';
-import {NativeLiblouisModule} from "./types";
+// src/index.ts
+import NativeLiblouisModule from "./NativeLiblouisModule";
 
-let module: NativeLiblouisModule = {
-    lou_translateString: (text: string, table: string): string => {
-        throw new Error('Native module not available');
-    },
-    lou_backTranslateString: (dots: string, table: string): string => {
-        throw new Error('Native module not available');
-    },
-    lou_isInitialized: (): boolean => {
-        throw new Error('Native module not available');
-    },
-}
+// export each individual function from the NativeLiblouisModule
+export const {
+  lou_translateString,
+  lou_backTranslateString,
+  lou_initialize,
+  lou_isInitialized,
+} = NativeLiblouisModule;
 
-if (Platform.OS === 'web') {
-    module = require('./NativeLiblouisModule.web').default;
-} else if (Platform.OS === 'ios') {
-    module = require('./NativeLiblouisModule.ios').default;
-} else if (Platform.OS === 'android') {
-    module = require('./NativeLiblouisModule.android').default;
-}
-
-export default module;
+// Export the module itself for use in other parts of the application
+export default NativeLiblouisModule;

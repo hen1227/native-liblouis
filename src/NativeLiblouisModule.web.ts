@@ -1,3 +1,4 @@
+// src/NativeLiblouisModule.web.ts
 // Built liblouis WebAssembly file is .js, so no type definitions are available.
 // @ts-ignore
 import LibLouisFactory from './liblouis-web/liblouis.js';

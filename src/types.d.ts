@@ -1,4 +1,4 @@
-// types.ts
+// types.d.ts
 export interface NativeLiblouisModule {
   /**
    * Translate text to braille
@@ -30,6 +30,3 @@ export interface NativeLiblouisModule {
    */
   lou_isInitialized: () => boolean;
 }
-
-// Export type for the module
-export type { NativeLiblouisModule as default };

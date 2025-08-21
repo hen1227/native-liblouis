@@ -1,16 +1,18 @@
 {
   "name": "native-liblouis",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Native Module for running a native version of the Liblouis braille translator",
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "scripts": {
-    "build-liblouis": "bash ./scripts/build-liblouis.sh",
+    "tables:sync": "bash scripts/sync-liblouis-tables.sh",
+    "tables:sync:noweb": "bash scripts/sync-liblouis-tables.sh --skip-web",
+    "rebuild-native": "bash scripts/build-all.sh",
+
     "tables:add": "node ./scripts/tables.mjs add",
     "tables:remove": "node ./scripts/tables.mjs remove",
     "tables:list": "node ./scripts/tables.mjs list",
     "tables:clear": "node ./scripts/tables.mjs clear",
-    "tables:sync": "node ./scripts/tables.mjs sync",
 
     "build": "tsc && copyfiles -u 1 \"src/liblouis-web/*.*\" build",
     "clean": "expo-module clean",
@@ -36,7 +38,7 @@
     "url": "https://github.com/hen1227/native-liblouis/issues"
   },
   "author": "Henry Abrahamsen <henhen1227@gmail.com> (https://github.com/hen1227)",
-  "license": "MIT",
+  "license": "LGPL-2.1-or-later",
   "homepage": "https://github.com/hen1227/native-liblouis#readme",
   "devDependencies": {
     "@types/react": "~19.0.0",

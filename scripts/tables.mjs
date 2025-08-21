@@ -80,7 +80,7 @@ async function addCmd() {
     const visited = new Set();
     for (const name of rest) await downloadOne(name, visited);
 
-    console.log("\nDone. Now run: npm run build-liblouis");
+    console.log("\nDone. Update native modules with npm run tables:sync");
 }
 
 function removeCmd() {
@@ -97,7 +97,7 @@ function removeCmd() {
             console.warn(`(not found) ${name}`);
         }
     }
-    console.log("\nDone. Now run: npm run build-liblouis");
+    console.log("\nDone. Update native modules with npm run tables:sync");
 }
 
 function listCmd() {
@@ -108,7 +108,7 @@ function listCmd() {
 
 function clearCmd() {
     for (const f of listLocal()) fs.unlinkSync(path.join(BUNDLED, f));
-    console.log("Cleared bundled tables.\nNow run: npm run build-liblouis");
+    console.log("Cleared bundled tables.\nNow add tables with: npm run tables:add <table.ctb ...>");
 }
 
 (async () => {
