@@ -1,6 +1,6 @@
 {
   "name": "native-liblouis",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Native Module for running a native version of the Liblouis braille translator",
   "main": "build/index.js",
   "types": "build/index.d.ts",
